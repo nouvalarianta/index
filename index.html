@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandala Policy Consulting - E-Recruitment HRIS</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        mandala: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom Scrollbar for Dashboard Tables */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased bg-slate-100 flex flex-col">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand & Slogan -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-amber-500 to-indigo-600 p-2.5 rounded-xl shadow-lg flex items-center justify-center text-white">
+                        <i class="fa-solid fa-scale-balanced text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-extrabold text-lg tracking-wide text-white">MANDALA</span>
+                            <span class="text-xs bg-amber-500/20 text-amber-300 font-semibold px-2 py-0.5 rounded border border-amber-500/30">POLICY CONSULTING</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 font-light hidden sm:block">Sistem Rekrutmen Berbasis Data & Meritokrasi Sektor Publik</p>
+                    </div>
+                </div>
+
+                <!-- Mode View Switcher Controls (Simulasi Dual Perspective UTS) -->
+                <div class="flex items-center space-x-2 bg-slate-800/80 p-1 rounded-xl border border-slate-700/60">
+                    <button id="btn-portal-view" onclick="switchView('applicant')" 
+                            class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center space-x-2 bg-indigo-600 text-white shadow">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <span>Portal Pelamar</span>
+                    </button>
+                    <button id="btn-admin-view" onclick="switchView('admin')" 
+                            class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-700/50">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>HR & Asesor Admin</span>
+                    </button>
+                </div>
+
+                <!-- User Profile Quick Info -->
+                <div class="hidden md:flex items-center space-x-3 text-right">
+                    <div id="user-profile-info">
+                        <div class="text-xs font-semibold text-slate-200" id="nav-user-name">Ahmad Rizky, M.A.</div>
+                        <div class="text-[10px] text-emerald-400 flex items-center justify-end space-x-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="nav-user-role">Pelamar (ID: CAND-JR-008)</span>
+                        </div>
+                    </div>
+                    <button onclick="openRubricModal()" class="text-slate-400 hover:text-amber-400 transition p-2 rounded-lg hover:bg-slate-800" title="Buka Bobot Rubrik Assessment (UTS)">
+                        <i class="fa-solid fa-circle-info text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+        <!-- ========================================================================= -->
+        <!-- VIEW 1: PUBLIC APPLICANT PORTAL (TAMPILAN DASHBOARD PELAMAR)              -->
+        <!-- ========================================================================= -->
+        <section id="applicant-portal-view" class="space-y-6 animate-fade-in">
+            
+            <!-- Hero Banner & Status Summary -->
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-slate-800">
+                <div class="absolute right-0 top-0 translate-x-12 -translate-y-12 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-file-contract text-[240px]"></i>
+                </div>
+                <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="space-y-2">
+                        <div class="inline-flex items-center space-x-2 bg-indigo-500/20 text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full border border-indigo-500/30">
+                            <i class="fa-solid fa-check-double text-emerald-400"></i>
+                            <span>Multi-Stage Hurdle Model Selection</span>
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Selamat Datang, Ahmad Rizky</h1>
+                        <p class="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                            Posisi Dilamar: <span class="font-semibold text-amber-300">Analis Junior Kebijakan Publik</span> (Kode: AJ-2026-M1)
+                        </p>
+                    </div>
+
+                    <!-- Overall Selection Progress Widget -->
+                    <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/80 min-w-[260px] space-y-3">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-400 font-medium">Progress Tahapan Seleksi</span>
+                            <span class="font-bold text-amber-400 text-sm">60%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-amber-500 to-emerald-400 h-2.5 rounded-full" style="width: 60%"></div>
+                        </div>
+                        <div class="text-[11px] text-slate-300 flex items-center justify-between">
+                            <span>Tahap Aktif: <strong class="text-white">Tahap 3 dari 5</strong></span>
+                            <span class="text-emerald-400 font-medium"><i class="fa-regular fa-clock"></i> Sisa 18 Jam</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- APPLICANT SELECTION HURDLE STEPS CARD LIST -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-bars-staggered text-indigo-600"></i>
+                            <span>Rincian Tahapan Seleksi Berjenjang (Hurdle Model)</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Setiap tahap bersifat eliminatif (gugur) berbasis kriteria ambang batas objektif.</p>
+                    </div>
+                    <div class="flex items-center space-x-2 text-xs">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-emerald-700 bg-emerald-50 border border-emerald-200">
+                            <i class="fa-solid fa-circle-check mr-1.5"></i> Lolos
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-amber-700 bg-amber-50 border border-amber-200">
+                            <i class="fa-solid fa-spinner animate-spin mr-1.5"></i> Sedang Berlangsung
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-slate-500 bg-slate-100 border border-slate-200">
+                            <i class="fa-solid fa-lock mr-1.5"></i> Terkunci
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-6 space-y-6">
+
+                    <!-- TAHAP 1: SELEKSI BERKAS & ADMINISTRASI OTOMATIS -->
+                    <div class="relative border-l-4 border-emerald-500 bg-emerald-50/20 rounded-r-xl p-5 border border-slate-200 transition">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="space-y-2 flex-1">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">1</span>
+                                    <h3 class="font-bold text-slate-900 text-base">Seleksi Berkas & Administrasi Otomatis</h3>
+                                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        PASSED / LOLOS
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-600 pl-10">
+                                    Verifikasi otomatis kualifikasi akademik minimum via API Integrasi PDDikti & Extraction OCR Parsing Dokumen.
+                                </p>
+                                
+                                <!-- Proof Verification Badges (Soal 2a) -->
+                                <div class="pl-10 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                                    <div class="bg-white p-3 rounded-lg border border-slate-200 text-xs space-y-1">
+                                        <div class="flex justify-between text-slate-500">
+                                            <span>Verifikasi IPK (PDDikti):</span>
+                                            <span class="text-emerald-600 font-semibold"><i class="fa-solid fa-shield-halved"></i> Valid API</span>
+                                        </div>
+                                        <div class="font-semibold text-slate-800">IPK 3.65 / 4.00 (Syarat Min: 3.25)</div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-lg border border-slate-200 text-xs space-y-1">
+                                        <div class="flex justify-between text-slate-500">
+                                            <span>Sertifikat Bahasa TOEFL (OCR Scan):</span>
+                                            <span class="text-emerald-600 font-semibold"><i class="fa-solid fa-file-circle-check"></i> OCR Verified</span>
+                                        </div>
+                                        <div class="font-semibold text-slate-800">Skor: 535 / 600 (Syarat Min: 500)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:text-right pl-10 md:pl-0 text-xs text-slate-500 space-y-1">
+                                <div>Tanggal Diverifikasi: <strong class="text-slate-700">01 Okt 2026</strong></div>
+                                <div>Bobot Composite Score: <strong class="text-indigo-600 font-semibold">30%</strong></div>
+                                <div>Nilai Sub-Skor Berkas: <span class="bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded">91.25 / 100</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAHAP 2: COMPUTER-BASED TEST (CBT) ONLINE -->
+                    <div class="relative border-l-4 border-emerald-500 bg-emerald-50/20 rounded-r-xl p-5 border border-slate-200 transition">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="space-y-2 flex-1">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">2</span>
+                                    <h3 class="font-bold text-slate-900 text-base">Computer-Based Test (CBT) Kognitif & Analitikal</h3>
+                                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                        PASSED / LOLOS
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-600 pl-10">
+                                    Ujian online terawasi (*proctored*) menguji Kemampuan Penalaran Logis, Analisis Statistik Dasar, dan Metodologi Penelitian Publik.
+                                </p>
+                                <div class="pl-10 pt-1 flex items-center space-x-4 text-xs">
+                                    <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200">
+                                        Skor Anda: <strong class="text-emerald-700 text-sm">85.00</strong> / 100 
+                                        <span class="text-slate-400 font-normal ml-1">(Passing Grade: 70.00)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:text-right pl-10 md:pl-0 text-xs text-slate-500 space-y-1">
+                                <div>Waktu Tes: <strong class="text-slate-700">03 Okt 2026</strong></div>
+                                <div>Bobot Composite Score: <strong class="text-indigo-600 font-semibold">30%</strong></div>
+                                <div>Nilai Sub-Skor CBT: <span class="bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded">85.00 / 100</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAHAP 3: TAKE-HOME POLICY CASE STUDY & WRITING ASSESSMENT (ACTIVE) -->
+                    <div class="relative border-l-4 border-amber-500 bg-amber-50/20 rounded-r-xl p-5 border border-slate-300 shadow-sm transition">
+                        <div class="space-y-4">
+                            <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                                <div class="space-y-1">
+                                    <div class="flex items-center space-x-3">
+                                        <span class="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold shadow-sm animate-pulse">3</span>
+                                        <h3 class="font-bold text-slate-900 text-base">Take-Home Policy Case Study & Policy Brief</h3>
+                                        <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center space-x-1">
+                                            <i class="fa-solid fa-clock text-amber-600"></i>
+                                            <span>TAHAP AKTIF (TAKE-HOME)</span>
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 pl-10">
+                                        Uji kemampuan analisis isu riil reformasi birokrasi daerah. Hasil disusun dalam format *Policy Brief* maks 4 halaman.
+                                    </p>
+                                </div>
+                                <div class="md:text-right pl-10 md:pl-0 text-xs text-slate-500 space-y-1">
+                                    <div>Tenggat Waktu: <strong class="text-amber-700">07 Okt 2026 (23:59 WIB)</strong></div>
+                                    <div>Bobot Composite Score: <strong class="text-indigo-600 font-semibold">20%</strong></div>
+                                </div>
+                            </div>
+
+                            <!-- Case Study Instruction & Dropzone Box -->
+                            <div class="pl-0 sm:pl-10 space-y-3">
+                                <div class="bg-amber-100/60 p-3 rounded-lg border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="p-2 bg-amber-500 text-white rounded-lg">
+                                            <i class="fa-solid fa-file-pdf text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-slate-800">Paket Soal Kasus: Studi_Kasus_Reformasi_Birokrasi_Pemda_2026.pdf</div>
+                                            <div class="text-slate-500 text-[11px]">Ukuran: 2.4 MB • Diunduh 1x</div>
+                                        </div>
+                                    </div>
+                                    <button onclick="triggerDownloadMock()" class="w-full sm:w-auto px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-md font-medium transition shadow-sm flex items-center justify-center space-x-1.5">
+                                        <i class="fa-solid fa-download"></i>
+                                        <span>Unduh Soal Kasus</span>
+                                    </button>
+                                </div>
+
+                                <!-- Blind Assessment Notice Alert (Soal 3) -->
+                                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-xs text-indigo-900 flex items-start space-x-2">
+                                    <i class="fa-solid fa-user-secret text-indigo-600 text-base mt-0.5"></i>
+                                    <div>
+                                        <strong class="font-semibold">Mekanisme Blind Review Aktif:</strong>
+                                        <p class="text-slate-600 text-[11px] mt-0.5">
+                                            Untuk menjamin integritas & pencegahan bias penilai, <strong class="text-indigo-900">JANGAN mencantumkan Nama, Foto, atau Institusi</strong> di dalam isi file Policy Brief. Sistem akan otomatis menyamarkan identitas Anda menjadi ID Anonymized <code class="bg-indigo-100 px-1 py-0.5 rounded text-indigo-800 font-mono">CAND-JR-008</code> saat diperiksa Asesor.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Upload Form Box -->
+                                <div class="border-2 border-dashed border-slate-300 rounded-xl p-5 text-center bg-white hover:bg-slate-50 transition cursor-pointer" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                                    <input type="file" id="file-input" class="hidden" accept=".pdf" onchange="handleFileUpload(event)">
+                                    <div id="upload-placeholder" class="space-y-2">
+                                        <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400"></i>
+                                        <div class="text-xs text-slate-600">
+                                            <span class="font-semibold text-indigo-600 hover:underline">Klik untuk unggah</span> atau drag & drop file Policy Brief (Format PDF)
+                                        </div>
+                                        <p class="text-[10px] text-slate-400">Maksimum ukuran file: 10MB • Format resmi: PDF</p>
+                                    </div>
+                                    <div id="upload-success-state" class="hidden space-y-2 text-xs">
+                                        <i class="fa-solid fa-circle-check text-3xl text-emerald-500"></i>
+                                        <div class="font-semibold text-slate-800" id="uploaded-filename">Draft_PolicyBrief_AhmadRizky.pdf</div>
+                                        <p class="text-emerald-600 font-medium text-[11px]">File berhasil diunggah & Tervalidasi AES-256 Checksum!</p>
+                                        <button type="button" onclick="event.stopPropagation(); removeUploadedFile()" class="px-2.5 py-1 text-red-600 hover:bg-red-50 border border-red-200 rounded text-[11px]">Ganti File</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAHAP 4: WAWANCARA KOMPREHENSIF & BEI -->
+                    <div class="relative border-l-4 border-slate-300 bg-slate-50 rounded-r-xl p-5 border border-slate-200 opacity-75">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-7 h-7 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs font-bold">4</span>
+                                    <h3 class="font-bold text-slate-700 text-base">Wawancara Komprehensif & Behavioral Event Interview (BEI)</h3>
+                                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                                        MENUNGGU TAHAP 3
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-500 pl-10">
+                                    Presentasi Policy Brief di hadapan Panel Asesor & Pendalaman Pengalaman Kepemimpinan Proyek Kebijakan.
+                                </p>
+                            </div>
+                            <div class="md:text-right pl-10 md:pl-0 text-xs text-slate-400">
+                                <div>Bobot Composite Score: <strong class="text-slate-600">20%</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAHAP 5: PENGUMUMAN AKHIR & OFFERING LETTER -->
+                    <div class="relative border-l-4 border-slate-300 bg-slate-50 rounded-r-xl p-5 border border-slate-200 opacity-75">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div class="space-y-1">
+                                <div class="flex items-center space-x-3">
+                                    <span class="w-7 h-7 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs font-bold">5</span>
+                                    <h3 class="font-bold text-slate-700 text-base">Penetapan Ranking & Penawaran Kerja (Offering Letter)</h3>
+                                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700">
+                                        FINAL STAGE
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-500 pl-10">
+                                    Kalkulasi otomatis *Composite Score* Gabungan. 8 Kandidat Analis Junior Teratas akan mendapatkan *Offering Letter*.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- DATA PROTECTION COMPLIANCE FOOTER NOTICE (Soal 2a) -->
+            <div class="bg-slate-900 text-slate-300 rounded-xl p-4 text-xs flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
+                        <i class="fa-solid fa-lock text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-white">Jaminan Perlindungan Data Pribadi Pelamar</div>
+                        <p class="text-[11px] text-slate-400">Sistem ini mematuhi UU No. 27 Tahun 2022 tentang Perlindungan Data Pribadi (PDP). Seluruh berkas dienkripsi AES-256 & diaudit secara berkala.</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 text-[11px]">
+                    <span class="px-2.5 py-1 bg-slate-800 rounded border border-slate-700 text-slate-300">
+                        <i class="fa-solid fa-shield-cat text-emerald-400 mr-1"></i> Audit Trail Encrypted
+                    </span>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================================= -->
+        <!-- VIEW 2: INTERNAL HR EXECUTIVE DASHBOARD & ASESOR PANEL (Halaman Admin)     -->
+        <!-- ========================================================================= -->
+        <section id="admin-dashboard-view" class="space-y-6 hidden animate-fade-in">
+
+            <!-- Admin Control Header & Mode Toggles -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-0.5 rounded-md">HR & DIREKSI PANEL</span>
+                        <h1 class="text-xl font-extrabold text-slate-900">Leaderboard & Assessment Executif</h1>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">
+                        Monitoring Composite Score otomatis dan evaluasi berkas *Blind Review* secara objektif.
+                    </p>
+                </div>
+
+                <!-- Filters and Special Toggles -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Target Position Selector -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Posisi Rekrutmen</label>
+                        <select id="admin-position-filter" onchange="applyAdminFilters()" class="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2 font-medium">
+                            <option value="junior">Analis Junior Kebijakan Publik (Kuota: 8)</option>
+                            <option value="senior">Analis Senior Kebijakan Publik (Kuota: 4)</option>
+                        </select>
+                    </div>
+
+                    <!-- BLIND ASSESSMENT TOGGLE (Soal 3) -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Integritas Penilai</label>
+                        <button id="toggle-blind-mode" onclick="toggleBlindMode()" class="px-3 py-2 bg-indigo-900 text-white rounded-lg text-xs font-semibold flex items-center space-x-2 shadow-sm transition hover:bg-indigo-800">
+                            <i id="blind-icon" class="fa-solid fa-eye-slash text-amber-400"></i>
+                            <span id="blind-label">BLIND ASSESSMENT: ON</span>
+                        </button>
+                    </div>
+
+                    <!-- Export Reports Button -->
+                    <div class="self-end">
+                        <button onclick="openExportModal()" class="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-medium flex items-center space-x-1.5 transition">
+                            <i class="fa-solid fa-file-export"></i>
+                            <span>Ekspor Rekap PDF</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Composite Score Rules Quick Summary Banner -->
+            <div id="weights-info-box" class="bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 text-white p-4 rounded-xl shadow border border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30">
+                        <i class="fa-solid fa-calculator text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-amber-300" id="weight-title-display">Bobot Composite Score (Analis Junior):</span>
+                        <div class="text-slate-300 text-[11px]" id="weight-detail-display">
+                            Berkas (30%) + CBT (30%) + Policy Brief (20%) + Interview BEI (20%) = Total 100%
+                        </div>
+                    </div>
+                </div>
+                <button onclick="openRubricModal()" class="text-xs text-indigo-200 hover:text-white underline font-medium">
+                    Lihat Matriks Rubrik Lengkap <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+
+            <!-- MAIN CANDIDATE RANKING TABLE (LEADERBOARD) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-trophy text-amber-500"></i>
+                        <span>Peringkat Nilai Gabungan (Automated Composite Leaderboard)</span>
+                    </h3>
+                    <span class="text-xs text-slate-500">
+                        Menampilkan top kandidat terurut realtime berdasarkan skor tertinggi
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100/80 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
+                            <tr>
+                                <th class="p-3 text-center">Rank</th>
+                                <th class="p-3">Candidate ID / Nama</th>
+                                <th class="p-3 text-center">Skor Berkas</th>
+                                <th class="p-3 text-center">Skor CBT / Tes</th>
+                                <th class="p-3 text-center">Skor Policy Case</th>
+                                <th class="p-3 text-center">Skor Panel BEI</th>
+                                <th class="p-3 text-center font-bold text-indigo-900">Total Composite</th>
+                                <th class="p-3 text-center">Rekomendasi</th>
+                                <th class="p-3 text-center">Aksi Asesor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="candidate-table-body" class="divide-y divide-slate-100">
+                            <!-- JS populated dynamic candidate rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SYSTEM AUDIT TRAIL LOGGING STREAM (Soal 2a & 3) -->
+            <div class="bg-slate-900 rounded-2xl p-5 text-white space-y-3 shadow-lg border border-slate-800">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-terminal text-emerald-400"></i>
+                        <h3 class="font-bold text-sm">System Audit Trail Logging (Real-Time Transparency)</h3>
+                    </div>
+                    <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">
+                        STATUS: COMPLIANT (UU PDP)
+                    </span>
+                </div>
+                
+                <div class="font-mono text-[11px] space-y-1.5 text-slate-300 max-h-36 overflow-y-auto pr-2" id="audit-log-container">
+                    <div class="flex items-center justify-between hover:bg-slate-800/50 p-1 rounded">
+                        <span><strong class="text-emerald-400">[13:25 WIB]</strong> [SYSTEM_OCR] Verifikasi otomatis sertifikat TOEFL CAND-JR-008 berhasil (Skor: 535)</span>
+                        <span class="text-slate-500 text-[10px]">Log Hash: #9821a</span>
+                    </div>
+                    <div class="flex items-center justify-between hover:bg-slate-800/50 p-1 rounded">
+                        <span><strong class="text-indigo-400">[12:40 WIB]</strong> [ASSESSOR_02] Memperbarui nilai Case Study CAND-JR-004 dari 85.00 -> 88.50 (Mode: Blind Review)</span>
+                        <span class="text-slate-500 text-[10px]">Log Hash: #9820b</span>
+                    </div>
+                    <div class="flex items-center justify-between hover:bg-slate-800/50 p-1 rounded">
+                        <span><strong class="text-amber-400">[11:15 WIB]</strong> [PDDIKTI_API] Validasi Ijazah & IPK CAND-JR-001 terverifikasi dengan pangkalan data Dikti</span>
+                        <span class="text-slate-500 text-[10px]">Log Hash: #9819c</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL 1: EVALUASI ASESOR (GRADING MODAL FOR BLIND REVIEW)                  -->
+    <!-- ========================================================================= -->
+    <div id="modal-grading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-5 border border-slate-200 animate-fade-in">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-indigo-100 text-indigo-700 rounded-lg">
+                        <i class="fa-solid fa-pen-to-square text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base" id="modal-candidate-id">Penilaian Blind Assessment</h3>
+                        <p class="text-xs text-slate-500">Input nilai karya Policy Brief tanpa bias identitas pelamar.</p>
+                    </div>
+                </div>
+                <button onclick="closeGradingModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Dokumen Policy Brief Candidate:</span>
+                        <a href="#" onclick="alert('Membuka file Policy Brief ter-anonymized...'); return false;" class="text-indigo-600 font-semibold hover:underline">
+                            <i class="fa-solid fa-file-pdf mr-1"></i> Buka_PolicyBrief_Anonymized.pdf
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Rubric Rating Controls -->
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">1. Nilai Take-Home Policy Case Study (Skala 0-100)</label>
+                        <input type="number" id="input-case-score" min="0" max="100" class="w-full p-2.5 border border-slate-300 rounded-lg font-semibold text-slate-800 focus:ring-indigo-500 focus:border-indigo-500">
+                        <p class="text-[11px] text-slate-400 mt-1">Rubrik: Kedalaman analisis masalah, ketepatan rekomendasi, & struktur sintesis.</p>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">2. Nilai Wawancara Komprehensif / Panel BEI (Skala 0-100)</label>
+                        <input type="number" id="input-bei-score" min="0" max="100" class="w-full p-2.5 border border-slate-300 rounded-lg font-semibold text-slate-800 focus:ring-indigo-500 focus:border-indigo-500">
+                        <p class="text-[11px] text-slate-400 mt-1">Rubrik: Artikulasi komunikasi, etika profesi sektor publik, & kepemimpinan.</p>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Catatan Feedback Asesor (Opsional Audit Log)</label>
+                        <textarea id="input-assessor-note" rows="2" placeholder="Tuliskan justifikasi penilaian..." class="w-full p-2 border border-slate-300 rounded-lg text-xs"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                <button onclick="closeGradingModal()" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-50">Batal</button>
+                <button onclick="saveCandidateScores()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium shadow-sm">Simpan Nilai & Re-Calculate Leaderboard</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL 2: MATRIKS RUBRIK assessment & BOBOT KUALIFIKASI (UTUS RUBRIC DISCLOSURE) -->
+    <div id="modal-rubric" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-5 border border-slate-200 max-h-[85vh] overflow-y-auto animate-fade-in">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="p-2 bg-amber-100 text-amber-700 rounded-lg">
+                        <i class="fa-solid fa-list-check text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Matriks Rubrik Penilaian & Bobot Seleksi (UTS Mandat)</h3>
+                        <p class="text-xs text-slate-500">Perbandingan Kualifikasi & Pembobotan Analis Junior vs Analis Senior</p>
+                    </div>
+                </div>
+                <button onclick="closeRubricModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <!-- Matrix Table -->
+                <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">Komponen Seleksi</th>
+                                <th class="p-3">Indikator & Bukti</th>
+                                <th class="p-3 text-center bg-indigo-50/50">Bobot Junior (8 Orang)</th>
+                                <th class="p-3 text-center bg-amber-50/50">Bobot Senior (4 Orang)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr>
+                                <td class="p-3 font-semibold text-slate-800">1. Seleksi Berkas (Kualifikasi Minimum)</td>
+                                <td class="p-3 text-slate-600">IPK (S1/S2), Sertifikat TOEFL/IELTS (OCR PDDikti). Untuk Senior wajib bukti *track record* minimal 4 tahun riset kebijakan.</td>
+                                <td class="p-3 text-center font-bold text-indigo-700 bg-indigo-50/20">30%</td>
+                                <td class="p-3 text-center font-bold text-amber-700 bg-amber-50/20">20%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-slate-800">2. Computer-Based Test (CBT)</td>
+                                <td class="p-3 text-slate-600">Penalaran logis & metodologi kuantitatif dasar. *Ditiadakan/Diintegrasikan bagi Senior*.</td>
+                                <td class="p-3 text-center font-bold text-indigo-700 bg-indigo-50/20">30%</td>
+                                <td class="p-3 text-center font-bold text-amber-700 bg-amber-50/20">0% (N/A)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-slate-800">3. Take-Home Policy Case Study</td>
+                                <td class="p-3 text-slate-600">Policy Brief 4 halaman (Blind Assessment). Penilaian: Kedalaman analisis masalah & artikulasi rekomendasi riil Pemda.</td>
+                                <td class="p-3 text-center font-bold text-indigo-700 bg-indigo-50/20">20%</td>
+                                <td class="p-3 text-center font-bold text-amber-700 bg-amber-50/20">40%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-slate-800">4. Wawancara Komprehensif & BEI</td>
+                                <td class="p-3 text-slate-600">Presentasi karya di depan Panel Direksi + Behavioral Event Interview (Kepemimpinan Tim & Etika Sektor Publik).</td>
+                                <td class="p-3 text-center font-bold text-indigo-700 bg-indigo-50/20">20%</td>
+                                <td class="p-3 text-center font-bold text-amber-700 bg-amber-50/20">40%</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="bg-slate-50 font-bold border-t border-slate-200">
+                            <tr>
+                                <td colspan="2" class="p-3 text-right">TOTAL COMPOSITE SCORE:</td>
+                                <td class="p-3 text-center text-indigo-700">100%</td>
+                                <td class="p-3 text-center text-amber-700">100%</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-600 text-[11px] leading-relaxed">
+                    <strong class="font-bold text-slate-800">Justifikasi Perbedaan Bobot (Soal 1):</strong>
+                    <p class="mt-0.5">
+                        Analis Junior difokuskan pada fondasi akademik & daya nalar logis dasar (Bobot CBT & Berkas total 60%). Sedangkan Analis Senior lebih memprioritaskan kemampuan pemecahan masalah kompleks, perancangan kebijakan strategis, serta kepemimpinan klien (Bobot Case Study & Wawancara BEI total 80%).
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-slate-100">
+                <button onclick="closeRubricModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-medium">Tutup Matriks</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL 3: EXPORT REPORT MODAL -->
+    <div id="modal-export" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200 animate-fade-in">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-900 text-base">Ekspor Laporan Rekrutmen</h3>
+                <button onclick="closeExportModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-600">
+                Unduh rekapitulasi penilaian lengkap beserta *Audit Trail Hash* untuk dokumentasi pertanggungjawaban seleksi.
+            </p>
+            <div class="space-y-2">
+                <button onclick="triggerPDFExportSim()" class="w-full p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-xl text-left transition flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-file-pdf text-red-500 text-xl"></i>
+                        <div>
+                            <div class="font-bold text-xs text-slate-800">Laporan Ranking Executif (PDF)</div>
+                            <div class="text-[10px] text-slate-500">Daftar kandidat lolos & cadangan + ttd digital</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-download text-slate-400"></i>
+                </button>
+            </div>
+            <div class="flex justify-end pt-2">
+                <button onclick="closeExportModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-medium">Batal</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TOAST NOTIFICATION POPUP SYSTEM -->
+    <div id="toast-notification" class="fixed bottom-5 right-5 z-50 hidden transform transition-all duration-300">
+        <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center space-x-3 text-xs">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+            <span id="toast-message">Pesan notifikasi berhasil...</span>
+        </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- APPLICATION JAVASCRIPT LOGIC & STATE MANAGEMENT                           -->
+    <!-- ========================================================================= -->
+    <script>
+        // APP STATE DATABASE (Mock Data untuk Simulasi Live UTS)
+        let isBlindMode = true;
+        let activePosition = 'junior'; // 'junior' or 'senior'
+
+        // Candidate Database
+        const candidateData = {
+            junior: [
+                { id: 'CAND-JR-004', name: 'Budi Pratama, S.IP.', berkas: 92.50, cbt: 88.00, caseScore: 89.00, bei: 91.00, status: 'OFFER' },
+                { id: 'CAND-JR-008', name: 'Ahmad Rizky, M.A.', berkas: 91.25, cbt: 85.00, caseScore: 86.50, bei: 88.00, status: 'OFFER' },
+                { id: 'CAND-JR-012', name: 'Citra Dewi, S.Sos.', berkas: 88.00, cbt: 90.00, caseScore: 84.00, bei: 85.00, status: 'OFFER' },
+                { id: 'CAND-JR-001', name: 'Dian Sastro, M.AP.', berkas: 85.00, cbt: 82.00, caseScore: 88.00, bei: 86.00, status: 'OFFER' },
+                { id: 'CAND-JR-019', name: 'Eko Prasetyo, S.E.', berkas: 87.00, cbt: 84.00, caseScore: 81.00, bei: 83.50, status: 'OFFER' },
+                { id: 'CAND-JR-003', name: 'Fani Rahma, M.Sc.', berkas: 82.00, cbt: 86.00, caseScore: 82.50, bei: 81.00, status: 'OFFER' },
+                { id: 'CAND-JR-015', name: 'Gilang Ramadhan, S.AP.', berkas: 84.00, cbt: 80.00, caseScore: 83.00, bei: 82.00, status: 'OFFER' },
+                { id: 'CAND-JR-022', name: 'Hani Susanti, S.IP.', berkas: 80.00, cbt: 83.00, caseScore: 80.00, bei: 81.00, status: 'OFFER' },
+                { id: 'CAND-JR-027', name: 'Indra Wijaya, S.Sos.', berkas: 78.00, cbt: 79.00, caseScore: 78.00, bei: 80.00, status: 'CADANGAN' },
+                { id: 'CAND-JR-030', name: 'Joko Widodo, S.AP.', berkas: 75.00, cbt: 77.00, caseScore: 75.00, bei: 76.00, status: 'CADANGAN' }
+            ],
+            senior: [
+                { id: 'CAND-SR-002', name: 'Dr. Maya Putri, M.Si.', berkas: 95.00, cbt: 0, caseScore: 92.00, bei: 94.00, status: 'OFFER' },
+                { id: 'CAND-SR-005', name: 'Rendra Kurniawan, Ph.D.', berkas: 90.00, cbt: 0, caseScore: 91.00, bei: 89.50, status: 'OFFER' },
+                { id: 'CAND-SR-001', name: 'Siti Nurhaliza, M.Pub.Pol.', berkas: 88.00, cbt: 0, caseScore: 87.00, bei: 90.00, status: 'OFFER' },
+                { id: 'CAND-SR-009', name: 'Taufik Hidayat, M.Econ.', berkas: 86.00, cbt: 0, caseScore: 88.00, bei: 85.00, status: 'OFFER' },
+                { id: 'CAND-SR-011', name: 'Utami Rahayu, M.Si.', berkas: 82.00, cbt: 0, caseScore: 83.00, bei: 82.00, status: 'CADANGAN' }
+            ]
+        };
+
+        let currentGradingTarget = null;
+
+        // Initialize App on DOM Load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderLeaderboard();
+        });
+
+        // VIEW SWITCHER LOGIC
+        function switchView(viewName) {
+            const portalView = document.getElementById('applicant-portal-view');
+            const adminView = document.getElementById('admin-dashboard-view');
+            const btnPortal = document.getElementById('btn-portal-view');
+            const btnAdmin = document.getElementById('btn-admin-view');
+            const navUserName = document.getElementById('nav-user-name');
+            const navUserRole = document.getElementById('nav-user-role');
+
+            if (viewName === 'applicant') {
+                portalView.classList.remove('hidden');
+                adminView.classList.add('hidden');
+                
+                btnPortal.className = "px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center space-x-2 bg-indigo-600 text-white shadow";
+                btnAdmin.className = "px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-700/50";
+                
+                navUserName.textContent = "Ahmad Rizky, M.A.";
+                navUserRole.textContent = "Pelamar (ID: CAND-JR-008)";
+                showToast("Beralih ke Tampilan Portal Pelamar Public", "fa-user-graduate");
+            } else {
+                portalView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+
+                btnAdmin.className = "px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center space-x-2 bg-indigo-600 text-white shadow";
+                btnPortal.className = "px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-700/50";
+
+                navUserName.textContent = "Panel Asesor & HRD";
+                navUserRole.textContent = "Executive Administrator";
+                renderLeaderboard();
+                showToast("Beralih ke Dashboard Executive Admin & Asesor", "fa-user-shield");
+            }
+        }
+
+        // CALCULATE COMPOSITE SCORE BASED ON POSITION WEIGHTS (Soal 1 & 2c)
+        function calculateComposite(candidate, position) {
+            if (position === 'junior') {
+                // Junior: Berkas 30%, CBT 30%, Case 20%, BEI 20%
+                return (candidate.berkas * 0.30) + (candidate.cbt * 0.30) + (candidate.caseScore * 0.20) + (candidate.bei * 0.20);
+            } else {
+                // Senior: Berkas 20%, CBT 0%, Case 40%, BEI 40%
+                return (candidate.berkas * 0.20) + (candidate.caseScore * 0.40) + (candidate.bei * 0.40);
+            }
+        }
+
+        // RENDER LEADERBOARD TABLE
+        function renderLeaderboard() {
+            const tableBody = document.getElementById('candidate-table-body');
+            activePosition = document.getElementById('admin-position-filter').value;
+            
+            // Update Weight Banner Info
+            const weightTitle = document.getElementById('weight-title-display');
+            const weightDetail = document.getElementById('weight-detail-display');
+            if (activePosition === 'junior') {
+                weightTitle.textContent = "Bobot Composite Score (Analis Junior - Kuota: 8):";
+                weightDetail.textContent = "Berkas (30%) + CBT (30%) + Policy Brief (20%) + Interview BEI (20%) = Total 100%";
+            } else {
+                weightTitle.textContent = "Bobot Composite Score (Analis Senior - Kuota: 4):";
+                weightDetail.textContent = "Berkas (20%) + CBT (0%) + Policy Brief (40%) + Interview BEI (40%) = Total 100%";
+            }
+
+            let candidates = candidateData[activePosition];
+
+            // Calculate composite score for each candidate
+            candidates.forEach(c => {
+                c.composite = calculateComposite(c, activePosition);
+            });
+
+            // Sort descending by Composite Score
+            candidates.sort((a, b) => b.composite - a.composite);
+
+            // Re-assign status based on quota ranking
+            const quota = activePosition === 'junior' ? 8 : 4;
+            candidates.forEach((c, idx) => {
+                if (idx < quota) {
+                    c.status = 'OFFER';
+                } else {
+                    c.status = 'CADANGAN';
+                }
+            });
+
+            tableBody.innerHTML = '';
+
+            candidates.forEach((c, index) => {
+                const rank = index + 1;
+                const tr = document.createElement('tr');
+                tr.className = rank <= quota ? "hover:bg-slate-50 transition bg-emerald-50/10" : "hover:bg-slate-50 transition";
+
+                // Candidate display name depending on Blind Review Toggle
+                const displayName = isBlindMode 
+                    ? `<span class="font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200"><i class="fa-solid fa-user-secret mr-1"></i>${c.id}</span>`
+                    : `<div><strong class="text-slate-800 font-semibold">${c.name}</strong> <div class="text-[10px] text-slate-400 font-mono">${c.id}</div></div>`;
+
+                const statusBadge = c.status === 'OFFER'
+                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">RECOMMENDED OFFER</span>`
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">CADANGAN</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-3 text-center font-bold text-slate-700">${rank}</td>
+                    <td class="p-3">${displayName}</td>
+                    <td class="p-3 text-center">${c.berkas.toFixed(2)}</td>
+                    <td class="p-3 text-center">${activePosition === 'junior' ? c.cbt.toFixed(2) : '<span class="text-slate-300">N/A</span>'}</td>
+                    <td class="p-3 text-center font-medium">${c.caseScore.toFixed(2)}</td>
+                    <td class="p-3 text-center font-medium">${c.bei.toFixed(2)}</td>
+                    <td class="p-3 text-center font-extrabold text-indigo-900 bg-indigo-50/30 text-sm">${c.composite.toFixed(2)}</td>
+                    <td class="p-3 text-center">${statusBadge}</td>
+                    <td class="p-3 text-center">
+                        <button onclick="openGradingModal('${c.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold border border-indigo-200 rounded text-[11px] transition">
+                            <i class="fa-solid fa-pen-to-square mr-1"></i> Nilai Asesor
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // BLIND ASSESSMENT TOGGLE FUNCTION
+        function toggleBlindMode() {
+            isBlindMode = !isBlindMode;
+            const btn = document.getElementById('toggle-blind-mode');
+            const icon = document.getElementById('blind-icon');
+            const label = document.getElementById('blind-label');
+
+            if (isBlindMode) {
+                btn.className = "px-3 py-2 bg-indigo-900 text-white rounded-lg text-xs font-semibold flex items-center space-x-2 shadow-sm transition hover:bg-indigo-800";
+                icon.className = "fa-solid fa-eye-slash text-amber-400";
+                label.textContent = "BLIND ASSESSMENT: ON";
+                showToast("Mode Blind Review DIAKTIFKAN (Identitas Disembunyikan)", "fa-user-secret");
+            } else {
+                btn.className = "px-3 py-2 bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold flex items-center space-x-2 shadow-sm transition hover:bg-slate-300";
+                icon.className = "fa-solid fa-eye text-slate-600";
+                label.textContent = "BLIND ASSESSMENT: OFF";
+                showToast("Mode Blind Review DINOONAKTIFKAN (Nama Terlihat)", "fa-eye");
+            }
+            renderLeaderboard();
+        }
+
+        function applyAdminFilters() {
+            renderLeaderboard();
+        }
+
+        // GRADING MODAL CONTROLS
+        function openGradingModal(candidateId) {
+            currentGradingTarget = candidateId;
+            const candidates = candidateData[activePosition];
+            const candidate = candidates.find(c => c.id === candidateId);
+
+            if (!candidate) return;
+
+            document.getElementById('modal-candidate-id').textContent = isBlindMode 
+                ? `Penilaian Blind Assessment: ${candidate.id}`
+                : `Penilaian Asesor: ${candidate.name} (${candidate.id})`;
+
+            document.getElementById('input-case-score').value = candidate.caseScore;
+            document.getElementById('input-bei-score').value = candidate.bei;
+            document.getElementById('input-assessor-note').value = "";
+
+            document.getElementById('modal-grading').classList.remove('hidden');
+        }
+
+        function closeGradingModal() {
+            document.getElementById('modal-grading').classList.add('hidden');
+        }
+
+        function saveCandidateScores() {
+            const caseScore = parseFloat(document.getElementById('input-case-score').value) || 0;
+            const beiScore = parseFloat(document.getElementById('input-bei-score').value) || 0;
+            const note = document.getElementById('input-assessor-note').value;
+
+            const candidates = candidateData[activePosition];
+            const candidate = candidates.find(c => c.id === currentGradingTarget);
+
+            if (candidate) {
+                const oldCase = candidate.caseScore;
+                candidate.caseScore = Math.min(100, Math.max(0, caseScore));
+                candidate.bei = Math.min(100, Math.max(0, beiScore));
+
+                // Add log entry to Audit Trail
+                addAuditLog(`[ASSESSOR_NOTE] Nilai Policy Case ${candidate.id} diperbarui dari ${oldCase.toFixed(2)} -> ${candidate.caseScore.toFixed(2)}`);
+
+                closeGradingModal();
+                renderLeaderboard();
+                showToast(`Skor ${candidate.id} berhasil diperbarui & Leaderboard terkalkulasi ulang!`, "fa-check-double");
+            }
+        }
+
+        // AUDIT TRAIL LOG GENERATOR
+        function addAuditLog(message) {
+            const container = document.getElementById('audit-log-container');
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} WIB`;
+            const randomHash = '#' + Math.random().toString(36).substring(2, 7);
+
+            const logDiv = document.createElement('div');
+            logDiv.className = "flex items-center justify-between hover:bg-slate-800/50 p-1 rounded animate-fade-in";
+            logDiv.innerHTML = `
+                <span><strong class="text-amber-400">[${timeStr}]</strong> ${message}</span>
+                <span class="text-slate-500 text-[10px]">Log Hash: ${randomHash}</span>
+            `;
+            container.insertBefore(logDiv, container.firstChild);
+        }
+
+        // OTHER MODALS CONTROLS
+        function openRubricModal() {
+            document.getElementById('modal-rubric').classList.remove('hidden');
+        }
+        function closeRubricModal() {
+            document.getElementById('modal-rubric').classList.add('hidden');
+        }
+
+        function openExportModal() {
+            document.getElementById('modal-export').classList.remove('hidden');
+        }
+        function closeExportModal() {
+            document.getElementById('modal-export').classList.add('hidden');
+        }
+
+        function triggerPDFExportSim() {
+            closeExportModal();
+            showToast("Laporan Rekapitulasi Leaderboard PDF berhasil di-generate!", "fa-file-pdf");
+        }
+
+        function triggerDownloadMock() {
+            showToast("Mengunduh Soal Studi Kasus Kebijakan Publik (PDF)...", "fa-download");
+        }
+
+        // FILE UPLOAD HANDLING (APPLICANT PORTAL)
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('upload-placeholder').classList.add('hidden');
+                document.getElementById('upload-success-state').classList.remove('hidden');
+                document.getElementById('uploaded-filename').textContent = file.name;
+                
+                addAuditLog(`[APPLICANT_UPLOAD] Pelamar CAND-JR-008 mengunggah jawaban Policy Brief: ${file.name}`);
+                showToast("File Policy Brief Berhasil Diunggah & Terverifikasi Checksum!", "fa-cloud-arrow-up");
+            }
+        }
+
+        function removeUploadedFile() {
+            document.getElementById('file-input').value = "";
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+            document.getElementById('upload-success-state').classList.add('hidden');
+            showToast("File unggahan dihapus.", "fa-trash");
+        }
+
+        // TOAST NOTIFICATION UTILITY
+        function showToast(message, iconClass = "fa-circle-check") {
+            const toast = document.getElementById('toast-notification');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.textContent = message;
+            iconEl.className = `fa-solid ${iconClass} text-emerald-400 text-base`;
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
